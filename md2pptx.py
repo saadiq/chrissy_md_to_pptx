@@ -374,20 +374,30 @@ def add_bullets_to_slide(slide, bullets: list[dict], y_pos,
     tf = txbox.text_frame
     tf.word_wrap = True
 
+    # Calculate chars per line based on width (roughly 10 chars per inch at 14pt)
+    chars_per_line = int(width / Inches(1) * 10)
+    total_lines = 0
+
     for i, bullet in enumerate(bullets):
         if i == 0:
             p = tf.paragraphs[0]
         else:
             p = tf.add_paragraph()
 
-        p.text = strip_formatting(bullet['text'])
+        text = strip_formatting(bullet['text'])
+        p.text = text
         p.font.size = Pt(14)
         p.font.color.rgb = NAVY
         p.level = bullet.get('level', 0)
 
-    # Estimate height based on bullet count
-    height = Inches(0.25 * len(bullets))
-    return y_pos + height + Inches(0.15)
+        # Estimate lines this bullet will take (account for indent reducing width)
+        effective_chars = chars_per_line - (bullet.get('level', 0) * 4)
+        lines_for_bullet = max(1, (len(text) + effective_chars - 1) // effective_chars)
+        total_lines += lines_for_bullet
+
+    # Height per line at 14pt font
+    height = Inches(0.22 * total_lines)
+    return y_pos + height + Inches(0.1)
 
 
 def add_text_to_slide(slide, text: str, y_pos,

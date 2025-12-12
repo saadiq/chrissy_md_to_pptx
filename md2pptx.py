@@ -406,10 +406,12 @@ def add_text_to_slide(slide, text: str, y_pos,
     left = left if left is not None else Inches(0.5)
     width = width if width is not None else Inches(9)
 
+    clean_text = strip_formatting(text)
+
     txbox = slide.shapes.add_textbox(left, y_pos, width, Inches(1))
     tf = txbox.text_frame
     tf.word_wrap = True
-    tf.paragraphs[0].text = strip_formatting(text)
+    tf.paragraphs[0].text = clean_text
     tf.paragraphs[0].font.size = Pt(14)
     tf.paragraphs[0].font.color.rgb = NAVY
 
@@ -420,9 +422,10 @@ def add_text_to_slide(slide, text: str, y_pos,
         # Full implementation would require run-level formatting
         pass
 
-    # Estimate height
-    lines = len(text) // 100 + 1
-    return y_pos + Inches(0.2 * lines) + Inches(0.1)
+    # Estimate height based on text wrapping (roughly 10 chars per inch at 14pt)
+    chars_per_line = int(width / Inches(1) * 10)
+    lines = max(1, (len(clean_text) + chars_per_line - 1) // chars_per_line)
+    return y_pos + Inches(0.22 * lines) + Inches(0.08)
 
 
 def add_placeholder_to_slide(slide, description: str, y_pos,

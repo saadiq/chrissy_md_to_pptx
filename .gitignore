@@ -1,5 +1,7 @@
-# Markdown files
+# Markdown files (except README and CLAUDE.md)
 *.md
+!README.md
+!CLAUDE.md
 
 # PowerPoint files
 *.pptx
